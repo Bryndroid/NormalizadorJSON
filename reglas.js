@@ -8,6 +8,7 @@ export const RULES_NORMALIZATION = Object.freeze({
     timestamp: ["timestamp", "date", "datetime", "created_at", "createdAt"],
     status: ["status", "state", "result"],
   },
+  minimumAmount: 0,
   amountPattern: /^[+-]?(?:\d+|\d{1,3}(?:[.,\s]\d{3})+)(?:[.,]\d+)?$/,
   currencySymbols: {
     "$": "USD",
@@ -30,8 +31,8 @@ export const RULES_NORMALIZATION = Object.freeze({
     PENDING: ["pending", "processing", "in_progress", "in progress", "queued", "waiting"],
   },
   sourcePatterns: [
-    { source: "bank", keys: ["iban", "bic", "swift", "bank_account", "bankAccount", "routing_number"] },
-    { source: "paypal", keys: ["paypal_id", "paypalId", "payer_id", "payerId"] },
-    { source: "crypto", keys: ["wallet", "wallet_address", "walletAddress", "txid", "transaction_hash", "transactionHash"] },
+    { source: "bank", keys: ["iban", "bic", "swift", "bank_account", "bankAccount", "routing_number", "bank"] },
+    { source: "paypal", keys: ["paypal_id", "paypalId", "payer_id", "payerId","paypal"] },
+    { source: "crypto", keys: ["wallet", "wallet_address", "walletAddress", "txid", "transaction_hash", "transactionHash", "crypto"] },
   ],
 });

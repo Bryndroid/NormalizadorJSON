@@ -108,7 +108,7 @@ const app = (() => {
     const number = Number(value);
     if (!Number.isFinite(number)) return null;
     const rounded = Math.round((number + Number.EPSILON) * 100) / 100;
-    return { value: rounded, original, rounded: Math.abs(number - rounded) > 1e-9 };
+    return { value: rounded, numericValue: number, original, rounded: Math.abs(number - rounded) > 1e-9 };
   }
 
   function normalizeAmount(raw, issues, corrections) {
@@ -121,9 +121,13 @@ const app = (() => {
       addIssue(issues, "amount", "El importe no tiene un formato numérico reconocido.");
       return null;
     }
+    if (parsed.numericValue < RULES_NORMALIZATION.minimumAmount) {
+      addIssue(issues, "amount", "El importe no puede ser negativo; la transacción se descarta.");
+      return null;
+    }
     if (parsed.rounded) {
       corrections.push({ field: "amount", message: "Importe redondeado a dos decimales.", successful: true });
-    } else if (String(raw).trim() !== parsed.value.toFixed(2)) {
+    } else if (typeof raw !== "number" && String(raw).trim() !== parsed.value.toFixed(2)) {
       corrections.push({ field: "amount", message: "Formato del importe normalizado a dos decimales.", successful: true });
     }
     return parsed.value;
@@ -216,10 +220,18 @@ const app = (() => {
 
     const timestamp = normalizeTimestamp(getField(record, "timestamp").value, issues, corrections);
     const status = normalizeStatus(getField(record, "status").value, issues, corrections);
-    const source = options.source === "auto" ? detectSource(record) : options.source;
+    const sourceField = getField(record, "source").value;
+    const sourceValue = typeof sourceField === "string" ? sourceField.trim().toLowerCase() : "";
+    const declaredSource = RULES_NORMALIZATION.sourcePatterns.some(pattern => pattern.source === sourceValue)
+      ? sourceValue
+      : null;
+    const source = options.source === "auto" ? declaredSource || detectSource(record) : options.source;
     if (!source) addIssue(issues, "source", "No se detectó una fuente bank, paypal o crypto.");
-    else if (options.source === "auto") {
-      corrections.push({ field: "source", message: `Fuente detectada como ${source}.`, successful: true });
+    else if (options.source === "auto" && (declaredSource === null || sourceField !== declaredSource)) {
+      const message = declaredSource === null
+        ? `Fuente detectada como ${source}.`
+        : `Fuente normalizada a ${source}.`;
+      corrections.push({ field: "source", message, successful: true });
     }
 
     const normalized = { id, amount, currency, timestamp, status, source };
