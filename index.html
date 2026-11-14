@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f4f7fb">
+    <title>Normalizador de transacciones</title>
+    <link rel="stylesheet" href="./styles.css">
+    <script type="module" src="./main.js"></script>
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="page-header">
+        <p class="eyebrow">Herramienta de datos</p>
+        <h1>Normalizador de transacciones</h1>
+        <p class="intro">Convierte registros de distintas fuentes a un formato consistente y exportable.</p>
+      </header>
+
+      <section class="panel input-panel" aria-labelledby="input-heading">
+        <div class="section-heading">
+          <div>
+            <p class="step-label">Etapa 1 · Ingesta</p>
+            <h2 id="input-heading">Carga tus transacciones</h2>
+          </div>
+        </div>
+
+        <div class="options-grid">
+          <label class="field-label" for="currency-select">
+            Moneda de salida
+            <select id="currency-select">
+              <option value="varied">Variadas (detectar por transacción)</option>
+              <option value="EUR">EUR</option>
+              <option value="USD">USD</option>
+            </select>
+          </label>
+          <label class="field-label" for="source-select">
+            Fuente
+            <select id="source-select">
+              <option value="auto">Auto-detección</option>
+              <option value="bank">Bank</option>
+              <option value="paypal">PayPal</option>
+              <option value="crypto">Crypto</option>
+            </select>
+          </label>
+        </div>
+
+        <label class="field-label file-label" for="json-file">
+          Archivo JSON
+          <input id="json-file" type="file" accept=".json,application/json">
+        </label>
+
+        <label class="field-label" for="json-input">
+          O pega el JSON aquí
+          <textarea id="json-input" rows="9" spellcheck="false" placeholder='[{"id":"TX-1","amount":"€1.234,50","status":"completed","date":"2024-03-15","iban":"ES..."}]'></textarea>
+        </label>
+        <p class="hint">Acepta un array de transacciones, un objeto con una propiedad <code>transactions</code> o una transacción individual.</p>
+        <div class="button-row">
+          <button id="process-button" class="button button-primary" type="button">Procesar transacciones</button>
+          <span id="input-status" class="inline-status" role="status" aria-live="polite"></span>
+        </div>
+      </section>
+
+      <section id="results-section" class="results-section" aria-labelledby="results-heading" hidden>
+        <div class="results-header">
+          <div>
+            <p class="step-label">Etapas 2–5 · Normalización, validación y métricas</p>
+            <h2 id="results-heading">Resultado del procesamiento</h2>
+          </div>
+          <div class="results-actions">
+            <span id="results-status" class="inline-status" role="status" aria-live="polite"></span>
+            <button id="back-button" class="button button-secondary" type="button">Cargar otros datos</button>
+            <button id="export-button" class="button button-primary" type="button" disabled>Exportar JSON</button>
+          </div>
+        </div>
+
+        <div class="transaction-panels">
+          <div class="panel transaction-results-panel">
+            <div class="table-heading">
+              <div>
+                <h3>Transacciones válidas</h3>
+                <p>Registros normalizados en formato JSON.</p>
+              </div>
+              <span id="valid-count" class="count-badge">0 registros</span>
+            </div>
+            <div id="results-cards" class="transactions-grid"></div>
+            <p id="empty-results" class="empty-state" hidden>No hay transacciones válidas para mostrar.</p>
+          </div>
+
+          <div class="panel input-records-panel">
+            <div class="table-heading">
+              <div>
+                <h3>Transacciones ingresadas</h3>
+                <p>Verde claro: válidas · rojo claro: inválidas.</p>
+              </div>
+              <span id="input-count" class="count-badge">0 registros</span>
+            </div>
+            <div id="input-cards" class="transactions-grid"></div>
+          </div>
+        </div>
+
+        <div id="metrics" class="metrics-grid" aria-live="polite"></div>
+
+        <div class="record-panels">
+          <div id="corrections-panel" class="panel detail-panel" hidden>
+            <h3>Correcciones aplicadas</h3>
+            <div id="corrections-list" class="records-list"></div>
+          </div>
+          <div id="errors-panel" class="panel error-panel" hidden>
+            <h3>Transacciones no normalizadas</h3>
+            <div id="errors-list" class="records-list"></div>
+          </div>
+        </div>
+      </section>
+
+      <footer>La información se procesa localmente en este navegador.</footer>
+    </main>
+  </body>
+</html>
